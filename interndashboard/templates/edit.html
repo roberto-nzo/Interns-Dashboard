@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+{% block body %}
+<div class="container">
+    <form method="POST">
+        <div class="form-floating">
+            {% for x in outputs %}
+            <div class="form-group">
+                <label>Topic:</label>
+                <input class="form-control" type="text" name="topics" value="{{x.topics}}">
+            </div>
+            <div class="form-group">
+                <label>Starting date:</label>
+                <input class="form-control" type="date" name="startingdate" value="{{x.startingdate}}">
+            </div>
+            <div class="form-group">
+                <label>Finish date:</label>
+                <input class="form-control" type="date" name="finishdate" value="{{x.finishdate}}">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input class="form-control" type="text" name="description" value="{{x.description}}">
+            </div>
+            {% endfor %}
+            <br>
+            <button class="btn btn-primary">Submit</button>
+            <a class="btn btn-secondary" href="{{url_for('users.dashboard')}}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
