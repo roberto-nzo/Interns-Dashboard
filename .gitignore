@@ -1,4 +1,4 @@
-/Lib
-/__pycache__
+Lib/
+__pycache__/
 .pyvenv.cfg
-/Scripts
+Scripts/
