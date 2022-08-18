@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash
 from interndashboard import mysql
+from interndashboard.users.routes import login_required
 
 utils = Blueprint('utils', __name__, template_folder='templates')
 
 # Topic
 @utils.route('/dashboard/<topics>')
-# @loggin_required
+@login_required
 def dashboard_manipulate(topics):
     # Create a cursor
     cur = mysql.connection.cursor()
@@ -17,7 +18,7 @@ def dashboard_manipulate(topics):
 
 # Edit
 @utils.route('/edit/<topics>', methods=['POST', 'GET'])
-# @loggin_required
+@login_required
 def edit(topics):
     cur = mysql.connection.cursor()
     if request.method == 'POST':
@@ -38,7 +39,7 @@ def edit(topics):
 
 # Delete
 @utils.route('/delete/<topics>')
-# @loggin_required
+@login_required
 def delete(topics):
     cur = mysql.connection.cursor()
     cur.execute('DELETE FROM topic_created WHERE topics=%s', [topics])
@@ -48,7 +49,7 @@ def delete(topics):
 
 # Dashboard form
 @utils.route('/createtopic/<studentnumber>', methods=['POST', 'GET'])
-# @loggin_required
+@login_required
 def createtopic(studentnumber):
     if request.method == 'POST':
         topics = request.form['topics']

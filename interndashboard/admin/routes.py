@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session
 from interndashboard import mysql
+from interndashboard.users.routes import login_required
 
 admin = Blueprint('admin', __name__, template_folder='templates')
 
 # Admin
 @admin.route('/studentsdashboard')
-# @loggin_required
+@login_required
 def studentsdashboard():
     if session['studentnumber'] == 1:
         cur = mysql.connection.cursor()
@@ -19,7 +20,7 @@ def studentsdashboard():
 
 # Admin view dashboard for a specific student
 @admin.route('/studentdashboard/<studentnumber>')
-# @loggin_required
+@login_required
 def studentdashboard(studentnumber):
     cur = mysql.connection.cursor()
     cur.execute('SELECT * FROM dashboard WHERE studentnumber=%s', [studentnumber])
@@ -33,7 +34,7 @@ def studentdashboard(studentnumber):
 
 # topics that needs to be approved or disapproved
 @admin.route('/approvedisapprove/<studentnumber>')
-# @loggin_required
+@login_required
 def approvedisapprove(studentnumber):
     cur = mysql.connection.cursor()
     cur.execute('SELECT * FROM dashboard WHERE studentnumber=%s', [studentnumber])
@@ -47,7 +48,7 @@ def approvedisapprove(studentnumber):
 
 # Move rows to another table
 @admin.route('/approve/<studentnumber>/<topics>')
-# @loggin_required
+@login_required
 def approve(studentnumber, topics):
     cur = mysql.connection.cursor()
     cur.execute('INSERT INTO dashboard(studentnumber, topics, description, startingdate, finishdate) SELECT * FROM topic_created WHERE studentnumber=%s and topics=%s',[studentnumber, topics])

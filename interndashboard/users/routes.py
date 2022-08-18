@@ -1,8 +1,19 @@
 from flask import Blueprint, request, flash, redirect, url_for, render_template, session
 from passlib.hash import sha256_crypt
+from functools import wraps
 from interndashboard import mysql
 
 users = Blueprint('users', __name__, template_folder='templates')
+
+# Controls login
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'loggedin' in session:
+            return f(*args, **kwargs)
+        flash("Unauthorized access, please sign in!", 'danger')
+        return redirect(url_for('users.signin'))
+    return decorated_function
 
 # Signup path
 @users.route('/signup', methods=["POST", "GET"])
@@ -37,14 +48,14 @@ def signin():
         cur = mysql.connection.cursor()
         result = cur.execute("SELECT * FROM signup WHERE studentnumber=%s", [studentnumber])
         if result > 0:
-            data = cur.fetchone()
-            mypassword = data['mypassword']
+            users = cur.fetchone()
+            mypassword = users['mypassword']
             # Close connection
             cur.close()
             if sha256_crypt.verify(password, mypassword):
                 session['loggedin'] = True
-                session['studentnumber'] = data['studentnumber']
-                session['firstname'] = data['firstname']
+                session['studentnumber'] = users['studentnumber']
+                session['firstname'] = users['firstname']
                 flash('You are logged in', 'success')
                 return redirect(url_for('main.home'))
             else:
@@ -58,14 +69,14 @@ def signin():
 
 # Log out
 @users.route('/logout')
-# @loggin_required
+@login_required
 def logout():
     session.clear()
     return redirect(url_for('users.signin'))
 
 # Student dashboard
 @users.route('/dashboard/')
-# @loggin_required
+@login_required
 def dashboard():
     # Create a cursor
     cur = mysql.connection.cursor()
