@@ -1,0 +1,20 @@
+{% extends 'index.html' %}
+{% block body %}
+<br>
+<div class="container col-sm-4">
+    <form method="POST">
+        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+
+        <div class="form-floating">
+            <input type="text" class="form-control" placeholder="Student number" name="studentnumber">
+            <label>Student number</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" class="form-control" placeholder="Password" name="password">
+            <label for="floatingPassword">Password</label>
+        </div>
+        <br>
+        <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+    </form>
+</div>
+{% endblock %}
