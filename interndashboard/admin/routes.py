@@ -1,4 +1,8 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session
+import json
+import pandas as pd
+import plotly
+import plotly.express as px
 from interndashboard import mysql
 from interndashboard.users.routes import login_required
 
@@ -25,11 +29,12 @@ def studentdashboard(studentnumber):
     cur = mysql.connection.cursor()
     cur.execute('SELECT * FROM dashboard WHERE studentnumber=%s', [studentnumber])
     outputs = cur.fetchall()
+    
+    cur.execute("SELECT * FROM topic_created WHERE studentnumber=%s", [studentnumber])
+    results = cur.fetchall()
+
     cur.close()
-    curs = mysql.connection.cursor()
-    curs.execute("SELECT * FROM topic_created WHERE studentnumber=%s", [studentnumber])
-    results = curs.fetchall()
-    cur.close()
+
     return render_template('dashboard.html', outputs=outputs, results=results)
 
 # topics that needs to be approved or disapproved
@@ -39,12 +44,19 @@ def approvedisapprove(studentnumber):
     cur = mysql.connection.cursor()
     cur.execute('SELECT * FROM dashboard WHERE studentnumber=%s', [studentnumber])
     outputs = cur.fetchall()
-    cur.close()
-    cur = mysql.connection.cursor()
+    
     cur.execute("SELECT * FROM topic_created WHERE studentnumber=%s", [studentnumber])
     results = cur.fetchall()
+
+    # Display dashboard graph of the student
+    cur.execute('SELECT * FROM dashgraph WHERE studentnumber=%s', [studentnumber])
+    datas = cur.fetchall()
     cur.close()
-    return render_template('approvedisapprove.html', outputs=outputs, results=results)
+    
+    df = pd.DataFrame(datas)
+    fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='topics', color='percentages')
+    graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+    return render_template('approvedisapprove.html', outputs=outputs, results=results, graph1json=graph1json)
 
 # Move rows to another table
 @admin.route('/approve/<studentnumber>/<topics>')

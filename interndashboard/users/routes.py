@@ -1,5 +1,9 @@
 from flask import Blueprint, request, flash, redirect, url_for, render_template, session
 from passlib.hash import sha256_crypt
+import pandas as pd
+import json
+import plotly
+import plotly.express as px
 from functools import wraps
 from interndashboard import mysql
 
@@ -78,18 +82,27 @@ def logout():
 @users.route('/dashboard/')
 @login_required
 def dashboard():
-    # Create a cursor
+    # Dashboard of approved topics
     cur = mysql.connection.cursor()
     rlt = cur.execute("SELECT * FROM dashboard WHERE studentnumber=%s", [session['studentnumber']])
     outputs = cur.fetchall()
 
+    # Dashboard that has to be approved
+    rslts = cur.execute('SELECT * FROM topic_created WHERE studentnumber=%s', [session['studentnumber']])
+    results = cur.fetchall()
+    
+    # For dashboard graph
+    cur.execute('SELECT * FROM dashgraph WHERE studentnumber=%s', [session['studentnumber']])
+    datas = cur.fetchall()
     cur.close()
-    curs = mysql.connection.cursor()
-    rslts = curs.execute('SELECT * FROM topic_created WHERE studentnumber=%s', [session['studentnumber']])
-    results = curs.fetchall()
-    curs.close()
+
+    df = pd.DataFrame(datas)
+    fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='topics', color='percentages')
+    fig1.update_yaxes(autorange='reversed')
+    graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+
     if rlt > 0 or rslts > 0:
-        return render_template('dashboard.html', outputs=outputs, results=results)
+        return render_template('dashboard.html', outputs=outputs, results=results, graph1json=graph1json)
     else:
         flash('Dashboard is empty', 'danger')
         return render_template('dashboard.html')
