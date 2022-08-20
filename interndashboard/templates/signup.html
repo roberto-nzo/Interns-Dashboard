@@ -1,0 +1,49 @@
+{% extends 'index.html' %}
+{% block body %}
+<form action="" method="POST">
+    <div class="container-fluid col-sm-6">
+        <h1 class="h1 mb-3 fw-normal">Sign Up</h1>
+        <p>Please fill in this form to create an account.</p>
+        <hr>
+
+        <div class="form-floating">
+            <input class="form-control" type="text" placeholder="Enter Email" name="studentnumber" required>
+            <label>Student Number</label>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" type="text" placeholder="Enter Password" name="firstname" required>
+            <label>First Name</label>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" type="text" placeholder="Repeat Password" name="surname" required>
+            <label>Surname</label>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" type="text" placeholder="Repeat Password" name="major" required>
+            <label>Major</label>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" type="text" placeholder="Repeat Password" name="degree" required>
+            <label>Degree</label>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" type="email" placeholder="Repeat Password" name="studentmail" required>
+            <label>Student Mail</label>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" type="password" placeholder="Repeat Password" name="password" required>
+            <label>Password</label>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" type="password" placeholder="Repeat Password" name="confirm" required>
+            <label>Confirm Password</label>
+        </div>
+        <br><br>
+        <div>
+            <a href="{{url_for('main.home')}}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </div>
+
+    </div>
+</form>
+{% endblock %}

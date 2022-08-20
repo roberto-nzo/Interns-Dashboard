@@ -1,0 +1,8 @@
+{% extends 'index.html' %}
+{% block body %}
+<br>
+{% if session['loggedin'] %}
+<h1 class="h3 mb-3 fw-normal">Hi, <small>{{session['firstname']}}!!</small></h1>
+{% endif %}
+
+{% endblock %}
