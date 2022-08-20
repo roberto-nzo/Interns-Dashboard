@@ -3,3 +3,5 @@ __pycache__/
 .pyvenv.cfg
 Scripts/
 *.cfg
+share/
+/etc
