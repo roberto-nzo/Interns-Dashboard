@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, session
+from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 import json
 import pandas as pd
 import plotly
 import plotly.express as px
-from interndashboard import mysql
 from interndashboard.users.routes import login_required
+from ..models import *
 
 admin = Blueprint('admin', __name__, template_folder='templates')
 
@@ -13,61 +13,50 @@ admin = Blueprint('admin', __name__, template_folder='templates')
 @login_required
 def studentsdashboard():
     if session['studentnumber'] == 1:
-        cur = mysql.connection.cursor()
-        cur.execute('SELECT * FROM adminview')
-        outputs = cur.fetchall()
-        cur.close()
+        outputs = User.query.filter(User.studentnumber!=1).all()
+        
         return render_template('studentsdashboard.html', outputs=outputs)
     else:
-        flash('You must be the admin to access that page...', 'danger')
+        flash('Access denied', 'danger')
         return redirect(url_for('main.home'))
 
-# Admin view dashboard for a specific student
-@admin.route('/studentdashboard/<studentnumber>')
-@login_required
-def studentdashboard(studentnumber):
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM dashboard WHERE studentnumber=%s', [studentnumber])
-    outputs = cur.fetchall()
-    
-    cur.execute("SELECT * FROM topic_created WHERE studentnumber=%s", [studentnumber])
-    results = cur.fetchall()
-
-    cur.close()
-
-    return render_template('dashboard.html', outputs=outputs, results=results)
 
 # topics that needs to be approved or disapproved
 @admin.route('/approvedisapprove/<studentnumber>')
 @login_required
 def approvedisapprove(studentnumber):
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM dashboard WHERE studentnumber=%s', [studentnumber])
-    outputs = cur.fetchall()
-    
-    cur.execute("SELECT * FROM topic_created WHERE studentnumber=%s", [studentnumber])
-    results = cur.fetchall()
-
-    # Display dashboard graph of the student
-    cur.execute('SELECT * FROM dashgraph WHERE studentnumber=%s', [studentnumber])
-    datas = cur.fetchall()
-    cur.close()
-    
-    df = pd.DataFrame(datas)
-    fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='topics', color='percentages')
-    graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-    return render_template('approvedisapprove.html', outputs=outputs, results=results, graph1json=graph1json)
+    if session['studentnumber'] == 1:
+        user = User.query.filter_by(studentnumber=studentnumber).first_or_404()
+        outputs = Dashboard.query.filter_by(studentnumber=studentnumber).all()
+        
+        results = Topic_create.query.filter_by(studentnumber=studentnumber).all()
+        
+        # # Display dashboard graph of the student
+        # cur.execute('SELECT * FROM dashgraph WHERE studentnumber=%s', [studentnumber])
+        # datas = cur.fetchall()
+        # cur.close()
+        
+        # df = pd.DataFrame(datas)
+        # fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='topics', color='percentages')
+        # graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+        return render_template('approvedisapprove.html', user=user, outputs=outputs, results=results)
+    else:
+        flash('Access denied...', 'danger')
+        return redirect(request.url)
 
 # Move rows to another table
-@admin.route('/approve/<studentnumber>/<topics>')
+@admin.route('/approve/<id>/<studentnumber>/<topics>')
 @login_required
-def approve(studentnumber, topics):
-    cur = mysql.connection.cursor()
-    cur.execute('INSERT INTO dashboard(studentnumber, topics, description, startingdate, finishdate) SELECT * FROM topic_created WHERE studentnumber=%s and topics=%s',[studentnumber, topics])
-    mysql.connection.commit()
-    cur.execute('DELETE FROM topic_created WHERE studentnumber=%s and topics=%s',[studentnumber, topics])
-    mysql.connection.commit()
-    cur.execute('SELECT studentnumber FROM dashboard WHERE topics=%s and studentnumber=%s', [topics, studentnumber])
-    studentnumber = cur.fetchone()
-    cur.close()
-    return redirect(url_for('admin.approvedisapprove', studentnumber=studentnumber['studentnumber']))
+def approve(studentnumber, topics, id):
+    if session['studentnumber'] == 1:
+        topic = Topic_create.query.filter_by(id=id).first_or_404()
+        dash = Dashboard(studentnumber=topic.studentnumber, topics=topic.topics, description=topic.description, startingdate=topic.startingdate, finishdate=topic.finishdate)
+        db.session.add(dash)
+        db.session.commit()
+        db.session.delete(topic)
+        db.session.commit()
+
+        return redirect(url_for('admin.approvedisapprove', studentnumber=studentnumber))
+    else:
+        flash('Access denied...', 'danger')
+        return redirect(request.url)

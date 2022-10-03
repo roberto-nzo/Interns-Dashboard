@@ -3,27 +3,25 @@
 <div class="container">
     <form method="POST">
         <div class="form-floating">
-            {% for x in outputs %}
             <div class="form-group">
                 <label>Topic:</label>
-                <input class="form-control" type="text" name="topics" value="{{x.topics}}">
+                <input class="form-control" type="text" name="topics" value="{{outputs.topics}}">
             </div>
             <div class="form-group">
                 <label>Starting date:</label>
-                <input class="form-control" type="date" name="startingdate" value="{{x.startingdate}}">
+                <input class="form-control" type="date" name="startingdate" value="{{outputs.startingdate}}">
             </div>
             <div class="form-group">
                 <label>Finish date:</label>
-                <input class="form-control" type="date" name="finishdate" value="{{x.finishdate}}">
+                <input class="form-control" type="date" name="finishdate" value="{{outputs.finishdate}}">
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <input class="form-control" type="text" name="description" value="{{x.description}}">
+                <input class="form-control" type="text" name="description" value="{{outputs.description}}">
             </div>
-            {% endfor %}
             <br>
             <button class="btn btn-primary">Submit</button>
-            <a class="btn btn-secondary" href="{{url_for('users.dashboard')}}">Cancel</a>
+            <a class="btn btn-secondary" href="{{url_for('users.dashboard', id=outputs.id, studentnumber=outputs.studentnumber)}}">Cancel</a>
         </div>
     </form>
 </div>

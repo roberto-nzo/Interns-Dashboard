@@ -12,14 +12,13 @@
                 {% if session['studentnumber'] == 1 %}
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page"
-                        href="{{ url_for('admin.studentsdashboard') }}">Student
-                        Dashboard</a>
+                        href="{{ url_for('admin.studentsdashboard') }}">Student Dashboard</a>
                 </li>
                 {% endif %}
 
                 {% if session['studentnumber'] != 1 %}
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('users.dashboard') }}">Dashboard</a>
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('users.dashboard', studentnumber=session['studentnumber']) }}">Dashboard</a>
                 </li>
                 {% endif %}
 

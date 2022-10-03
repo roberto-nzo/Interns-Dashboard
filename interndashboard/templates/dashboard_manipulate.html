@@ -13,21 +13,17 @@
             </tr>
         </thead>
         <tbody>
-            {% for output in outputs %}
             <tr>
-                <td class="col-sm-1">{{output.topics}}</td>
-                <td class="col-sm-1">{{output.description}}</td>
-                <td class="col-sm-1">{{output.startingdate}}</td>
-                <td class="col-sm-1">{{output.finishdate}}</td>
+                <td class="col-sm-1">{{outputs.topics}}</td>
+                <td class="col-sm-1">{{outputs.description}}</td>
+                <td class="col-sm-1">{{outputs.startingdate}}</td>
+                <td class="col-sm-1">{{outputs.finishdate}}</td>
             </tr>
-            {%endfor%}
         </tbody>
     </table>
     <div>
-        {% for output in outputs%}
-        <a href="/edit/{{output.topics}}" class="btn btn-primary">Edit</a>
-        <a href="{{url_for('utils.delete', topics=output.topics)}}" class="btn btn-danger">Delete</a>
-        {% endfor %}
+        <a href="/edit/{{outputs.id}}/{{outputs.topics}}" class="btn btn-primary">Edit</a>
+        <a href="{{url_for('utils.delete', id=outputs.id, topics=outputs.topics)}}" class="btn btn-danger">Delete</a>
     </div>
 </div>
 {% endblock %}

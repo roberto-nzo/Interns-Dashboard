@@ -1,14 +1,15 @@
 from flask import Flask
-from flask_mysqldb import MySQL
-from config import Config
+from .extensions import db
 
-mysql = MySQL()
 
-def create_app(config_class=Config):
+def create_app():
     app = Flask(__name__)
+    # app.config.from_object(class_config)
+    app.config['SECRET_KEY'] = 'APSIOHF0EIFNO9GUOB'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///interndashboard.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    app.config.from_object(Config)
-    mysql.init_app(app)
+    db.init_app(app)
 
     from interndashboard.main.routes import main
     from interndashboard.admin.routes import admin

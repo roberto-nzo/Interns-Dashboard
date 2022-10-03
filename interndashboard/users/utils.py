@@ -1,51 +1,62 @@
+from turtle import update
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash
-from interndashboard import mysql
 from interndashboard.users.routes import login_required
+from ..models import *
+from datetime import datetime, date
 
 utils = Blueprint('utils', __name__, template_folder='templates')
 
 # Topic
-@utils.route('/dashboard/<topics>')
+@utils.route('/temp_dashboard/<id>/<topics>')
 @login_required
-def dashboard_manipulate(topics):
-    # Create a cursor
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM topic_created WHERE topics=%s", [topics])
-    outputs = cur.fetchall()
-    cur.close()
-    if result > 0:
-        return render_template('dashboard_manipulate.html', outputs=outputs)
+def dashboard_manipulate(topics, id):
+    results = Topic_create.query.filter_by(id=id).first()
+    return render_template('dashboard_manipulate.html', outputs=results)
 
 # Edit
-@utils.route('/edit/<topics>', methods=['POST', 'GET'])
+@utils.route('/edit/<id>/<topics>', methods=['POST', 'GET'])
 @login_required
-def edit(topics):
-    cur = mysql.connection.cursor()
+def edit(topics, id):
     if request.method == 'POST':
         topic = request.form['topics']
         description = request.form['description']
-        startingdate = request.form['startingdate']
-        finishdate = request.form['finishdate']
-        cur.execute("UPDATE topic_created SET topics=%s, description=%s, startingdate=%s, finishdate=%s WHERE topics=%s", (topic, description, startingdate, finishdate, topics))
-        # Commit DB
-        mysql.connection.commit()
-        cur.close()
-        return redirect(url_for('users.dashboard'))
+        startingdate_data = request.form['startingdate']
+        finishdate_data = request.form['finishdate']
+        startingdate = datetime.strptime(startingdate_data, '%Y-%m-%d').date()
+        finishdate = datetime.strptime(finishdate_data, '%Y-%m-%d').date()
+        
+        
+        new = Topic_create.query.filter_by(id=id).first()
+        new.topic = topic
+        new.description = description
+        new.startingdate = startingdate
+        new.finishdate = finishdate
+        db.session.commit()
+        user = User.query.filter_by(studentnumber=new.studentnumber).first()
+        if session['studentnumber'] == user.studentnumber:
+            return redirect(url_for('users.dashboard', id=new.id, studentnumber=new.studentnumber))
+        else:
+            return redirect(url_for('admin.approvedisapprove', studentnumber=new.studentnumber))
     else:
-        cur.execute('SELECT * FROM topic_created WHERE topics=%s', [topics])
-        outputs = cur.fetchall()
-        cur.close()
+        outputs = Topic_create.query.filter_by(id=id).first()
+        check = Topic_create.query.filter_by(id=id).first()
+        print(check.description)
+        
         return render_template('edit.html', outputs=outputs)
 
 # Delete
-@utils.route('/delete/<topics>')
+@utils.route('/delete/<id>/<topics>')
 @login_required
-def delete(topics):
-    cur = mysql.connection.cursor()
-    cur.execute('DELETE FROM topic_created WHERE topics=%s', [topics])
-    mysql.connection.commit()
-    cur.close()
-    return redirect(url_for('users.dashboard'))
+def delete(topics, id):
+    topic = Topic_create.query.filter_by(id=id).first()
+    user = User.query.filter_by(studentnumber=topic.studentnumber).first()
+    db.session.delete(topic)
+    db.session.commit()
+    # Dashboard.
+    if session['studentnumber'] == 1:
+        return redirect(url_for('admin.approvedisapprove', studentnumber=user.studentnumber))
+    else:
+        return redirect(url_for('users.dashboard', studentnumber=user.studentnumber))
 
 # Dashboard form
 @utils.route('/createtopic/<studentnumber>', methods=['POST', 'GET'])
@@ -53,21 +64,21 @@ def delete(topics):
 def createtopic(studentnumber):
     if request.method == 'POST':
         topics = request.form['topics']
-        startingdate = request.form['startingdate']
-        finishdate = request.form['finishdate']
+        startingdate_data = request.form['startingdate']
+        finishdate_data = request.form['finishdate']
         description = request.form['description']
-        # Create a cursor
+        startingdate = datetime.strptime(startingdate_data, '%Y-%m-%d').date()
+        finishdate = datetime.strptime(finishdate_data, '%Y-%m-%d').date()
+
         if startingdate < finishdate:
-            cur = mysql.connection.cursor()
-            cur.execute("INSERT INTO topic_created(studentnumber, topics, description, startingdate, finishdate) VALUES(%s, %s, %s, %s, %s)", (studentnumber, topics, description, startingdate, finishdate))
-            # Commit in DB
-            mysql.connection.commit()
-            # Close cur
-            cur.close()
+            topic = Topic_create(studentnumber=studentnumber, topics=topics, description=description, startingdate=startingdate, finishdate=finishdate)
+            db.session.add(topic)
+            db.session.commit()
+            
             if session["studentnumber"] == 1:
                 return redirect(url_for('admin.approvedisapprove', studentnumber=studentnumber))
-            return redirect(url_for('admin.studentdashboard', studentnumber = studentnumber))
+            return redirect(url_for('users.dashboard', studentnumber = studentnumber))
         else:
             flash("Finish date has to be at least one day ahead of starting date", 'danger')
             return render_template('createtopic.html')
-    return render_template('createtopic.html')
+    return render_template('createtopic.html', studentnumber=studentnumber)

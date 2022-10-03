@@ -14,12 +14,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for output in outputs %}
+                    {% for x in outputs %}
                     <tr>
-                        <td>{{output.topics}}</td>
-                        <td>{{output.description}}</td>
-                        <td>{{output.startingdate}}</td>
-                        <td>{{output.finishdate}}</td>
+                        <td>{{x.topics}}</td>
+                        <td>{{x.description}}</td>
+                        <td>{{x.startingdate}}</td>
+                        <td>{{x.finishdate}}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -43,9 +43,9 @@
                 </tr>
             </thead>
             <tbody>
-                {% for w in results %}
+                {% for w in topics %}
                 <tr>
-                    <td><a href="{{url_for('utils.dashboard_manipulate', topics=w.topics)}}">{{w.topics}}</a></td>
+                    <td><a href="{{url_for('utils.dashboard_manipulate', id=w.id, topics=w.topics)}}">{{w.topics}}</a></td>
                     <td>{{w.description}}</td>
                     <td>{{w.startingdate}}</td>
                     <td>{{w.finishdate}}</td>
@@ -57,9 +57,7 @@
 </div>
 
 <div>
-    {% set x = outputs[0] %}
-    {% set y = x['studentnumber'] %}
-    <a href="{{url_for('utils.createtopic', studentnumber=y)}}" class="btn btn-success">Create</a>
+    <a href="{{url_for('utils.createtopic', studentnumber=user.studentnumber)}}" class="btn btn-success">Create</a>
 </div>
 {% endif %}
 

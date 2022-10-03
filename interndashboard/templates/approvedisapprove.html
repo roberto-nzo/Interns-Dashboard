@@ -3,9 +3,7 @@
 <br>
 
 <h3>
-    {% set m = outputs[0] %}
-    {% set n = m['studentnumber'] %}
-    The progress of student {{n}}
+    The progress of student {{user.studentnumber}}
 </h3>
 <div class="card m-auto" style="width: 100%">
     <div class="table-responsive">
@@ -35,7 +33,7 @@
 </div>
 <br>
 <div>
-    <h4>Topics that need to be confirmed for student {{n}}</h4>
+    <h4>Topics that need to be confirmed for student {{user.studentnumber}}</h4>
 </div>
 <div class="card m-auto" style="width: 100%">
     <div class="table-responsive">
@@ -51,12 +49,12 @@
             <tbody>
                 {% for w in results %}
                 <tr>
-                    <td><a href="{{url_for('utils.dashboard_manipulate', topics=w.topics)}}">{{w.topics}}</a></td>
+                    <td><a href="{{url_for('utils.dashboard_manipulate', id=w.id, topics=w.topics)}}">{{w.topics}}</a></td>
                     <td>{{w.description}}</td>
                     <td>{{w.startingdate}}</td>
                     <td>{{w.finishdate}}</td>
                     <td><a class="btn btn-success"
-                            href="{{url_for('admin.approve', topics=w.topics, studentnumber=w.studentnumber)}}">Approve</a>
+                            href="{{url_for('admin.approve',id=w.id, topics=w.topics, studentnumber=w.studentnumber)}}">Approve</a>
                     </td>
                     <td><a class="btn btn-secondary" href="">Disapprove</a></td>
                 </tr>
@@ -67,9 +65,7 @@
 </div>
 
 <div>
-    {% set x = outputs[0] %}
-    {% set y = x['studentnumber'] %}
-    <a href="{{url_for('utils.createtopic', studentnumber=y)}}" class="btn btn-success">Create</a>
+    <a href="{{url_for('utils.createtopic', studentnumber=user.studentnumber)}}" class="btn btn-success">Create</a>
 </div>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>

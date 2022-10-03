@@ -21,7 +21,11 @@
             </div>
             <br>
             <button class="btn btn-primary">Submit</button>
-            <a class="btn btn-secondary" href="{{url_for('users.dashboard')}}">Cancel</a>
+            {% if session['studentnumber'] == 1%}
+            <a class="btn btn-secondary" href="{{url_for('admin.approvedisapprove', studentnumber=studentnumber)}}">Cancel</a>
+            {%else%}
+            <a class="btn btn-secondary" href="{{url_for('users.dashboard', studentnumber=studentnumber)}}">Cancel</a>
+            {%endif%}
         </div>
     </form>
 </div>
