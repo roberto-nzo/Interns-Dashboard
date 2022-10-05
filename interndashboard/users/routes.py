@@ -92,22 +92,41 @@ def dashboard(studentnumber):
     outputs = Dashboard.query.filter_by(studentnumber=session['studentnumber']).all()
     # outputs = db.session.execute(db.select(Dashboard).filter_by(studentnumber=session['studentnumber'])).scalar()
     print(outputs)
- 
-    # Dashboard that has to be approved
-    topics = Topic_create.query.filter_by(studentnumber=studentnumber).all()
-    print(topics)
     
+    # Dashboard that has to be approved
+    topics_model = Topic_create.query.filter_by(studentnumber=studentnumber).all()
+    print(topics_model)
+
     # # For dashboard graph
     # cur.execute('SELECT * FROM dashgraph WHERE studentnumber=%s', [session['studentnumber']])
     # datas = cur.fetchall()
+    datas = Dashboard.query.filter_by(studentnumber=session['studentnumber']).all()
+    datas_dict = {"id": [], "topics":[], "description":[], "startingdate":[], "finishdate": []}
+    for x in datas:
+        datas_dict['id'].append(x.id)
+        datas_dict["topics"].append(x.topics)
+        datas_dict['description'].append(x.description)
+        datas_dict['startingdate'].append(x.startingdate)
+        datas_dict['finishdate'].append(x.finishdate)
+    
+    df = pd.DataFrame(datas_dict)
+    df['duration'] = df['finishdate'] - df['startingdate']
+    df['days'] = df['duration'].dt.days
+    df['done'] = datetime.today().date() - df['startingdate']
+    df['complete'] = df['done'].dt.days
+    df['percentages'] = (df['complete']*100)/df['days']
+    for p in df['percentages']:
+        if p > 100.0:
+            df['percentages'] = df['percentages'].replace([p], 100)
 
-    # df = pd.DataFrame(datas)
-    # fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='topics', color='percentages')
-    # fig1.update_yaxes(autorange='reversed')
-    # graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+    print()
+    print(df)
+    fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='id', color='percentages', hover_name='topics')
+    fig1.update_yaxes(autorange='reversed')
+    graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
 
-    if outputs != None or topics != None:
-        return render_template('dashboard.html', user=user, outputs=outputs, topics=topics)
+    if outputs != None or topics_model != None:
+        return render_template('dashboard.html', user=user, outputs=outputs, topics=topics_model, graph1json=graph1json)
     else:
         flash('Dashboard is empty', 'danger')
-        return render_template('dashboard.html', user=user, outputs=outputs, topics=topics)
+        return render_template('dashboard.html', user=user, outputs=outputs, topics=topics_model, graph1json=graph1json)

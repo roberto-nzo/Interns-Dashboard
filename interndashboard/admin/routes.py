@@ -42,7 +42,7 @@ def approvedisapprove(studentnumber):
         return render_template('approvedisapprove.html', user=user, outputs=outputs, results=results)
     else:
         flash('Access denied...', 'danger')
-        return redirect(request.url)
+        return redirect(url_for("main.home"))
 
 # Move rows to another table
 @admin.route('/approve/<id>/<studentnumber>/<topics>')
