@@ -90,16 +90,13 @@ def dashboard(studentnumber):
 
     # Dashboard of approved topics
     outputs = Dashboard.query.filter_by(studentnumber=session['studentnumber']).all()
-    # outputs = db.session.execute(db.select(Dashboard).filter_by(studentnumber=session['studentnumber'])).scalar()
     print(outputs)
     
     # Dashboard that has to be approved
     topics_model = Topic_create.query.filter_by(studentnumber=studentnumber).all()
     print(topics_model)
 
-    # # For dashboard graph
-    # cur.execute('SELECT * FROM dashgraph WHERE studentnumber=%s', [session['studentnumber']])
-    # datas = cur.fetchall()
+    # For dashboard graph
     datas = Dashboard.query.filter_by(studentnumber=session['studentnumber']).all()
     datas_dict = {"id": [], "topics":[], "description":[], "startingdate":[], "finishdate": []}
     for x in datas:
