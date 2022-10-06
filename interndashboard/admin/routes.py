@@ -32,6 +32,31 @@ def approvedisapprove(studentnumber):
         results = Topic_create.query.filter_by(studentnumber=studentnumber).all()
         
         # # Display dashboard graph of the student
+        # For dashboard graph
+        datas = Dashboard.query.filter_by(studentnumber=studentnumber).all()
+        datas_dict = {"id": [], "topics":[], "description":[], "startingdate":[], "finishdate": []}
+        for x in datas:
+            datas_dict['id'].append(x.id)
+            datas_dict["topics"].append(x.topics)
+            datas_dict['description'].append(x.description)
+            datas_dict['startingdate'].append(x.startingdate)
+            datas_dict['finishdate'].append(x.finishdate)
+        
+        df = pd.DataFrame(datas_dict)
+        df['duration'] = df['finishdate'] - df['startingdate']
+        df['days'] = df['duration'].dt.days
+        df['done'] = datetime.today().date() - df['startingdate']
+        df['complete'] = df['done'].dt.days
+        df['percentages'] = (df['complete']*100)/df['days']
+        for p in df['percentages']:
+            if p > 100.0:
+                df['percentages'] = df['percentages'].replace([p], 100)
+
+        print()
+        print(df)
+        fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='id', color='percentages', hover_name='topics')
+        fig1.update_yaxes(autorange='reversed')
+        graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
         # cur.execute('SELECT * FROM dashgraph WHERE studentnumber=%s', [studentnumber])
         # datas = cur.fetchall()
         # cur.close()
@@ -39,7 +64,7 @@ def approvedisapprove(studentnumber):
         # df = pd.DataFrame(datas)
         # fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='topics', color='percentages')
         # graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-        return render_template('approvedisapprove.html', user=user, outputs=outputs, results=results)
+        return render_template('approvedisapprove.html', user=user, outputs=outputs, results=results, graph1json=graph1json)
     else:
         flash('Access denied...', 'danger')
         return redirect(url_for("main.home"))
