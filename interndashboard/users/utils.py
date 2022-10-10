@@ -26,13 +26,16 @@ def edit(topics, id):
         finishdate = datetime.strptime(finishdate_data, '%Y-%m-%d').date()
         
         
-        new = Topic_create.query.filter_by(id=id).first()
+        new = Topic_create.query.filter_by(id=id).first_or_404()
         new.topic = topic
         new.description = description
         new.startingdate = startingdate
         new.finishdate = finishdate
         db.session.commit()
-        user = User.query.filter_by(studentnumber=new.studentnumber).first()
+        disaprove = appr_disappr.query.filter_by(id_topic=new.id).first_or_404()
+        db.session.delete(disaprove)
+        db.session.commit()
+        user = User.query.filter_by(studentnumber=new.studentnumber).first_or_404()
         if session['studentnumber'] == user.studentnumber:
             return redirect(url_for('users.dashboard', id=new.id, studentnumber=new.studentnumber))
         else:
@@ -48,8 +51,10 @@ def edit(topics, id):
 @utils.route('/delete/<id>/<topics>')
 @login_required
 def delete(topics, id):
-    topic = Topic_create.query.filter_by(id=id).first()
-    user = User.query.filter_by(studentnumber=topic.studentnumber).first()
+    topic = Topic_create.query.filter_by(id=id).first_or_404()
+    disaprove = appr_disappr.query.filter_by(id_topic=topic.id).first_or_404()
+    user = User.query.filter_by(studentnumber=topic.studentnumber).first_or_404()
+    db.session.delete(disaprove)
     db.session.delete(topic)
     db.session.commit()
     # Dashboard.

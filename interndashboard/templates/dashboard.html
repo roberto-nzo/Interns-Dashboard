@@ -45,10 +45,14 @@
             <tbody>
                 {% for w in topics %}
                 <tr>
-                    <td><a href="{{url_for('utils.dashboard_manipulate', id=w.id, topics=w.topics)}}">{{w.topics}}</a></td>
+                    <td><a href="{{url_for('utils.dashboard_manipulate', id=w.id, topics=w.topics)}}">{{w.topics}}</a>
+                    </td>
                     <td>{{w.description}}</td>
                     <td>{{w.startingdate}}</td>
                     <td>{{w.finishdate}}</td>
+                    {% if w.id in list_disaprove %}
+                    <td>disapproved</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

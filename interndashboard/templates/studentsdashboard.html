@@ -17,6 +17,7 @@
         </thead>
         <tbody>
             {% for x in outputs %}
+            {% set z = x.studentnumber %}
             <tr>
                 <td>{{x.studentnumber}}</td>
                 <td>{{x.firstname}}</td>
@@ -33,6 +34,9 @@
                         {% endif %}
                     </p>
                 </td>
+                {% if x.studentnumber in m %}
+                <td><i class="fa-solid fa-circle" style="color: green;"></i></td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

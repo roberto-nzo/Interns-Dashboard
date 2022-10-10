@@ -4,7 +4,6 @@ from .extensions import db
 
 def create_app():
     app = Flask(__name__)
-    # app.config.from_object(class_config)
     app.config['SECRET_KEY'] = 'APSIOHF0EIFNO9GUOB'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///interndashboard.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

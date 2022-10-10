@@ -86,44 +86,53 @@ def logout():
 @login_required
 def dashboard(studentnumber):
     user = db.session.execute(db.select(User).filter_by(studentnumber=session['studentnumber'])).scalar()
-    print(user.studentnumber)
 
     # Dashboard of approved topics
     outputs = Dashboard.query.filter_by(studentnumber=session['studentnumber']).all()
-    print(outputs)
     
     # Dashboard that has to be approved
     topics_model = Topic_create.query.filter_by(studentnumber=studentnumber).all()
-    print(topics_model)
+
+    disaprove = appr_disappr.query.filter_by(studentnumber=studentnumber).all()
+    list_disaprove = []
+    for l in disaprove:
+        if l.id_topic not in list_disaprove:
+            list_disaprove.append(l.id_topic)
 
     # For dashboard graph
-    datas = Dashboard.query.filter_by(studentnumber=session['studentnumber']).all()
+    # datas = Dashboard.query.filter_by(studentnumber=session['studentnumber']).all()
     datas_dict = {"id": [], "topics":[], "description":[], "startingdate":[], "finishdate": []}
-    for x in datas:
-        datas_dict['id'].append(x.id)
-        datas_dict["topics"].append(x.topics)
-        datas_dict['description'].append(x.description)
-        datas_dict['startingdate'].append(x.startingdate)
-        datas_dict['finishdate'].append(x.finishdate)
-    
-    df = pd.DataFrame(datas_dict)
-    df['duration'] = df['finishdate'] - df['startingdate']
-    df['days'] = df['duration'].dt.days
-    df['done'] = datetime.today().date() - df['startingdate']
-    df['complete'] = df['done'].dt.days
-    df['percentages'] = (df['complete']*100)/df['days']
-    for p in df['percentages']:
-        if p > 100.0:
-            df['percentages'] = df['percentages'].replace([p], 100)
+    if outputs:
+        for x in outputs:
+            datas_dict['id'].append(x.id)
+            datas_dict["topics"].append(x.topics)
+            datas_dict['description'].append(x.description)
+            datas_dict['startingdate'].append(x.startingdate)
+            datas_dict['finishdate'].append(x.finishdate)
+        
+        df = pd.DataFrame(datas_dict)
+        df['duration'] = df['finishdate'] - df['startingdate']
+        df['days'] = df['duration'].dt.days
+        df['done'] = datetime.today().date() - df['startingdate']
+        df['complete'] = df['done'].dt.days
+        df['percentages'] = (df['complete']*100)/df['days']
+        for p in df['percentages']:
+            if p > 100.0:
+                df['percentages'] = df['percentages'].replace([p], 100)
 
-    print()
-    print(df)
-    fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='id', color='percentages', hover_name='topics')
-    fig1.update_yaxes(autorange='reversed')
-    graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+        print()
+        print(df)
+        fig1 = px.timeline(df, x_start='startingdate', x_end='finishdate', y='id', color='percentages', hover_name='topics')
+        fig1.update_yaxes(autorange='reversed')
+        graph1json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
 
-    if outputs != None or topics_model != None:
-        return render_template('dashboard.html', user=user, outputs=outputs, topics=topics_model, graph1json=graph1json)
+        if outputs != None or topics_model != None:
+            return render_template('dashboard.html', user=user, outputs=outputs, topics=topics_model, list_disaprove=list_disaprove, graph1json=graph1json)
+
+        else:
+            flash('Dashboard is empty', 'danger')
+            return render_template('dashboard.html', user=user, outputs=outputs, topics=topics_model, list_disaprove=list_disaprove, graph1json=graph1json)
     else:
-        flash('Dashboard is empty', 'danger')
-        return render_template('dashboard.html', user=user, outputs=outputs, topics=topics_model, graph1json=graph1json)
+        return render_template('dashboard.html', user=user, outputs=outputs, topics=topics_model, list_disaprove=list_disaprove)
+
+    
