@@ -1,5 +1,7 @@
 from datetime import datetime
-from .extensions import db
+from .extensions import db, ModelView
+from flask import session, flash
+from flask import abort, redirect, url_for
 
 
 class User(db.Model):
@@ -66,3 +68,14 @@ class appr_disappr(db.Model):
 
     def __repr__(self):
         return '<appr_disappr> %r' % self.topics
+
+
+class SecureModelView(ModelView):
+    def is_accessible(self):
+        if session:
+            if session['studentnumber'] == 1:
+                return True
+            else:
+                abort(403)
+        else:
+            abort(403)

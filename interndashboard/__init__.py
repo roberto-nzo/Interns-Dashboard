@@ -13,10 +13,9 @@ def create_app():
     db.init_app(app)
 
     admin = Admin(app, name='Admin', template_mode='bootstrap3')
-    admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(Dashboard, db.session))
-    admin.add_view(ModelView(Topic_create, db.session))
-    admin.add_view(ModelView(appr_disappr, db.session))
+    admin.add_view(SecureModelView(User, db.session))
+    admin.add_view(SecureModelView(Dashboard, db.session))
+    admin.add_view(SecureModelView(Topic_create, db.session))
 
     from interndashboard.main.routes import main
     from interndashboard.admin.routes import adminbp
