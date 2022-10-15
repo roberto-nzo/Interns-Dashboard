@@ -55,10 +55,10 @@
                     <td>{{w.startingdate}}</td>
                     <td>{{w.finishdate}}</td>
                     <td><a class="btn btn-success"
-                            href="{{url_for('admin.approve',id=w.id, topics=w.topics, studentnumber=w.studentnumber)}}">Approve</a>
+                            href="{{url_for('adminbp.approve',id=w.id, topics=w.topics, studentnumber=w.studentnumber)}}">Approve</a>
                     </td>
                     <td><a class="btn btn-secondary"
-                            href="{{url_for('admin.disapprove',id=w.id, topics=w.topics, studentnumber=w.studentnumber)}}">Disapprove</a>
+                            href="{{url_for('adminbp.disapprove',id=w.id, topics=w.topics, studentnumber=w.studentnumber)}}">Disapprove</a>
                     </td>
                     {% if w.id in list_disaprove %}
                     <td>disapproved</td>
